@@ -18,14 +18,7 @@ function NavBar() {
           </span>
         </div>
 
-        {/* Center Text Items */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-          <span className="hover:text-gray-900 transition">Overview</span>
-          <span className="hover:text-gray-900 transition">Storage</span>
-          <span className="hover:text-gray-900 transition">AI Features</span>
-          <span className="hover:text-gray-900 transition">Plans & Pricing</span>
-          <span className="hover:text-gray-900 transition">Support</span>
-        </nav>
+       
 
         {/* Right Placeholder */}
         <div className="hidden md:block text-gray-500 text-sm select-none">

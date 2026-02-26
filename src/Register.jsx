@@ -6,9 +6,9 @@ import { registerUser } from "./api/userApi";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: "ashraful momin",
-    email: "ashrafulmomin2@gmail.com",
-    password: "abcd",
+    name: "",
+    email: "",
+    password: "",
   });
   const [serverError, setServerError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);

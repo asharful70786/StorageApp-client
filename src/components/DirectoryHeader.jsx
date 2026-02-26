@@ -245,18 +245,7 @@ function DirectoryHeader({
                         </div>
                       </Link>
 
-                      <Link
-                        to="/subscription"
-                        className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <FaCloud className="text-gray-600 text-sm" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">Manage Subscription</div>
-                          <div className="text-sm text-gray-500">Billing and plans</div>
-                        </div>
-                      </Link>
+                
 
                       <div className="border-t border-gray-100 my-2"></div>
 
