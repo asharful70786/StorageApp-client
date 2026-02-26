@@ -102,7 +102,7 @@ function Subscription() {
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Subscription</h1>
-          <p className="text-gray-500 mt-1">Manage your plan and billing</p>
+          <p className="text-gray-500 mt-1">Manage your plan and billing okkkkki</p>
         </div>
         <div className="flex items-center gap-4">
           <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors">

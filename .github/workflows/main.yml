@@ -2,7 +2,8 @@ name: storageApp-client
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -11,21 +12,22 @@ jobs:
     env:
       S3_BUCKET_NAME: zenpixclient
       CLOUDFRONT_DISTRIBUTION_ID: E3KPC0TGKLHPJR
-      VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
-      VITE_BACKEND_BASE_URL: ${{ vars.VITE_BACKEND_BASE_URL }}
+      VITE_GOOGLE_CLIENT_ID: 894244013404-shsv1ml0rgs7f5lqtgk6smksm6br8p0t.apps.googleusercontent.com
+      VITE_BACKEND_BASE_URL: https://api.viralgut.com
 
     steps:
-      - name: Checkout
+      - name: Clone frontend repository
         uses: actions/checkout@v4
-
+        
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: "23"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm i
+
+     
 
       - name: Build app
         run: npm run build
@@ -44,4 +46,7 @@ jobs:
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
-            --paths "/*"
+            --paths "/index.html"
+
+      - name: Deployment complete
+        run: echo "Frontend Deployed Successfully..." 
