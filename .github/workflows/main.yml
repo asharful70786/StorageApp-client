@@ -10,8 +10,8 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      S3_BUCKET_NAME: storage-app-frontend-ashraful
-      CLOUDFRONT_DISTRIBUTION_ID: E10SARTVU09MM5
+      S3_BUCKET_NAME: zenpixclient
+      CLOUDFRONT_DISTRIBUTION_ID: E3KPC0TGKLHPJR
       VITE_GOOGLE_CLIENT_ID: 894244013404-shsv1ml0rgs7f5lqtgk6smksm6br8p0t.apps.googleusercontent.com
       VITE_BACKEND_BASE_URL: https://api.viralgut.com
 
