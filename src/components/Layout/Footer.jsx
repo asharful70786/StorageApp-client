@@ -1,45 +1,41 @@
 // src/components/Layout/Footer.jsx
 import { motion } from "framer-motion";
 
+import { FiCloud } from "react-icons/fi";
+
 function Footer() {
   return (
     <motion.footer
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="mt-16 border-t border-gray-200 bg-white/80 backdrop-blur-sm"
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className="mt-16 border-t border-slate-200 bg-[#f8f9fc] md:pl-60"
     >
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+      <div className="px-6 py-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-600 shadow-[0_8px_20px_rgba(59,130,246,0.25)]">
+  <FiCloud className="text-white" />
+</div>
 
-          {/* Brand */}
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-            <span className="font-semibold text-gray-800">CloudStorage</span>
+            <div className="min-w-0">
+              <p className="truncate text-lg font-semibold tracking-[-0.03em] text-slate-900 sm:text-xl">
+               CloudStorage
+              </p>
+              <p className="truncate text-sm text-slate-500">
+                Secure file CloudStorage platform
+              </p>
+            </div>
           </div>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-6">
-            <a
-              href="https://github.com/"
-              target="_blank"
-              className="hover:text-blue-600 transition"
-            >
-              GitHub
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-slate-500">
+            <a href="/plans" className="transition hover:text-slate-900">
+              Features
             </a>
 
-            <a
-              href="https://linkedin.com/"
-              target="_blank"
-              className="hover:text-blue-600 transition"
-            >
-              LinkedIn
-            </a>
-          </div>
-
-          {/* Copyright */}
-          <div className="text-gray-400 text-xs">
-            © {new Date().getFullYear()} CloudStorage
+            <span className="text-slate-400">
+              © {new Date().getFullYear()} CloudStorage. All rights reserved.
+            </span>
           </div>
         </div>
       </div>

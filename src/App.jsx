@@ -8,6 +8,7 @@ import Plans from "./Plans";
 import Subscription from "./Subscription";
 import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
+import LandingPage from "./LandingPage";
 
 
 
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
   {
     path: "/subscription",
     element: <Subscription />,
+  },
+  {
+    path: "/features",
+    element: <LandingPage />,
   },
 ]);
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createSubscription } from "./api/subscriptionApi";
+import AppSidebar from "./components/AppSidebar";
 
 const PLAN_CATALOG = {
   monthly: [
@@ -204,13 +205,43 @@ export default function Plans() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">
-          Choose your plan
-        </h1>
-        <Link to="/">Home</Link>
-      </header>
+
+    <div className="mx-auto max-w-6xl px-4 py-8 mt-18">
+      
+     <header className="mb-8 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/80 px-5 py-5 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-600">
+      Pricing
+    </p>
+    <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-[34px]">
+      Choose your plan
+    </h1>
+    <p className="mt-1.5 text-sm text-slate-500 sm:text-[15px]">
+      Pick the storage plan that fits your files, workflow, and growth.
+    </p>
+  </div>
+
+  <Link
+    to="/"
+    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className="h-4 w-4"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 19l-7-7 7-7"
+      />
+    </svg>
+    Back to Home
+  </Link>
+</header>
 
       {/* Tabs */}
       <div className="mb-6 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-sm">
@@ -254,6 +285,9 @@ export default function Plans() {
         start billing. You can prefill the plan IDs inside a static config.
       </p>
     </div>
+
+ 
+
   );
 }
 
