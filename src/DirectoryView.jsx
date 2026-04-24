@@ -273,8 +273,8 @@ function DirectoryView() {
 
     try {
       const data = await uploadInitiate({
-        name: file.name,
-        size: file.size,
+        filename: file.name,
+        filesize: file.size,
         contentType: file.type,
         parentDirId: dirId,
       });

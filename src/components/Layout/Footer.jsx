@@ -29,8 +29,12 @@ function Footer() {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-slate-500">
-            <a href="/plans" className="transition hover:text-slate-900">
+            <a href="/features" className="transition hover:text-slate-900">
               Features
+            </a>
+
+            <a href="/terms" className="transition hover:text-slate-900 text-red-500">
+              Terms
             </a>
 
             <span className="text-slate-400">

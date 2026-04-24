@@ -9,6 +9,7 @@ import Subscription from "./Subscription";
 import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
 import LandingPage from "./LandingPage";
+import TermsAndPrivacy from "./TermsAndPrivacy";
 
 
 
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
   {
     path: "/features",
     element: <LandingPage />,
+  },
+  {
+    path: "/terms",
+    element: <TermsAndPrivacy />,
   },
 ]);
 
