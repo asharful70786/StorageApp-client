@@ -6,7 +6,7 @@ function DirectoryList({ items }) {
   const { progressMap } = useDirectoryContext();
 
   return (
-    <div className="space-y-2">
+    <div>
       {items.map((item) => {
         const uploadProgress = progressMap[item.id] || 0;
         return (

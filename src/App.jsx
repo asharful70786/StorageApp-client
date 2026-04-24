@@ -55,7 +55,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
-      <NavBar />
+      {/* <NavBar /> */}
 
  
       <main className="flex-1">

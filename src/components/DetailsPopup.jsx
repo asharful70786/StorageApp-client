@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 
+/**
+ * Format a byte value into a readable storage size.
+ *
+ * @param {number} bytes - Size in bytes.
+ * @returns {string} Human-readable size label.
+ */
 export const formatSize = (bytes = 0) => {
   const KB = 1024;
   const MB = KB * 1024;
@@ -12,9 +18,7 @@ export const formatSize = (bytes = 0) => {
 };
 
 function DetailsPopup({ item, onClose }) {
-  if (!item) return null;
-
-  const [details, setDetails] = useState({
+  const [details] = useState({
     path: "/",
     size: 0,
     createdAt: new Date().toLocaleString(),
@@ -22,9 +26,6 @@ function DetailsPopup({ item, onClose }) {
     numberOfFiles: 0,
     numberOfFolders: 0,
   });
-
-  const { id, name, isDirectory, size, createdAt, updatedAt } = item;
-  const { path, numberOfFiles, numberOfFolders } = details;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -34,49 +35,69 @@ function DetailsPopup({ item, onClose }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  if (!item) return null;
+
+  const { name, isDirectory, size, createdAt, updatedAt } = item;
+  const { path, numberOfFiles, numberOfFolders } = details;
+
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-white p-6 rounded-lg shadow-md w-[90%] max-w-md"
+        className="w-full max-w-md rounded-3xl border border-white/70 bg-white p-6 shadow-[0_28px_80px_rgba(15,23,42,0.24)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold mb-4">Details</h2>
-        <div className="space-y-2 text-sm">
-          <div>
-            <span className="font-semibold">Name:</span> {name}
+        <h2 className="text-lg font-bold text-slate-950">Details</h2>
+        <p className="mt-1 truncate text-sm font-medium text-slate-500">
+          {name}
+        </p>
+        <div className="mt-5 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/70 text-sm">
+          <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+            <span className="font-semibold text-slate-500">Name</span>
+            <span className="break-all font-medium text-slate-900">{name}</span>
           </div>
-          <div>
-            <span className="font-semibold">Path:</span> {path}
+          <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+            <span className="font-semibold text-slate-500">Path</span>
+            <span className="break-all font-medium text-slate-900">{path}</span>
           </div>
-          <div>
-            <span className="font-semibold">Size:</span> {formatSize(size)}
+          <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+            <span className="font-semibold text-slate-500">Size</span>
+            <span className="font-medium text-slate-900">{formatSize(size)}</span>
           </div>
-          <div>
-            <span className="font-semibold">Created At:</span>{" "}
-            {new Date(createdAt).toLocaleString()}
+          <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+            <span className="font-semibold text-slate-500">Created</span>
+            <span className="font-medium text-slate-900">
+              {new Date(createdAt).toLocaleString()}
+            </span>
           </div>
-          <div>
-            <span className="font-semibold">Updated At:</span>{" "}
-            {new Date(updatedAt).toLocaleString()}
+          <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+            <span className="font-semibold text-slate-500">Updated</span>
+            <span className="font-medium text-slate-900">
+              {new Date(updatedAt).toLocaleString()}
+            </span>
           </div>
           {isDirectory && (
             <>
-              <div>
-                <span className="font-semibold">Files:</span> {numberOfFiles}
+              <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+                <span className="font-semibold text-slate-500">Files</span>
+                <span className="font-medium text-slate-900">
+                  {numberOfFiles}
+                </span>
               </div>
-              <div>
-                <span className="font-semibold">Folders:</span>{" "}
-                {numberOfFolders}
+              <div className="grid grid-cols-[112px_1fr] gap-3 px-4 py-3">
+                <span className="font-semibold text-slate-500">Folders</span>
+                <span className="font-medium text-slate-900">
+                  {numberOfFolders}
+                </span>
               </div>
             </>
           )}
         </div>
-        <div className="flex justify-end mt-2">
+        <div className="mt-5 flex justify-end">
           <button
-            className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
+            className="min-h-11 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)] transition-colors hover:bg-blue-700"
             onClick={onClose}
           >
             Close

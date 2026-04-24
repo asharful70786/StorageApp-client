@@ -15,12 +15,19 @@ import {
 import {
   deleteFile,
   renameFile,
+  uploadCancel,
   uploadComplete,
   uploadInitiate,
 } from "./api/fileApi";
 import DetailsPopup from "./components/DetailsPopup";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
-import { FaFolderPlus, FaUpload } from "react-icons/fa";
+import {
+  FaDatabase,
+  FaFileAlt,
+  FaFolder,
+  FaFolderPlus,
+  FaUpload,
+} from "react-icons/fa";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -33,37 +40,35 @@ function formatBytes(bytes) {
 }
 
 function getFileIcon(filename) {
-  if (!filename) return "📎";
+  if (!filename) return "alt";
   const ext = filename.split(".").pop().toLowerCase();
 
   switch (ext) {
     case "pdf":
-      return "📄";
+      return "pdf";
     case "png":
     case "jpg":
     case "jpeg":
     case "gif":
-      return "🖼️";
+      return "image";
     case "mp4":
     case "mov":
     case "avi":
-      return "🎬";
+      return "video";
     case "zip":
     case "rar":
     case "tar":
     case "gz":
-      return "📦";
+      return "archive";
     case "js":
     case "jsx":
-    case "ts":
-    case "tsx":
     case "html":
     case "css":
     case "py":
     case "java":
-      return "💻";
+      return "code";
     default:
-      return "📎";
+      return "alt";
   }
 }
 
@@ -149,8 +154,8 @@ function DirectoryView() {
   const fileInputRef = useRef(null);
 
   // ── Upload state ───────────────────────────────────────────────────────────
-  const [uploadItem, setUploadItem] = useState(null);
-  const xhrRef = useRef(null);
+  const [uploadItems, setUploadItems] = useState([]);
+  const xhrRefs = useRef(new Map());
 
   // ── Context menu / modals ─────────────────────────────────────────────────
   const [activeContextMenu, setActiveContextMenu] = useState(null);
@@ -252,92 +257,163 @@ function DirectoryView() {
   }
 
   async function handleFileSelect(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selectedFiles = Array.from(e.target.files || []);
+    e.target.value = "";
 
-    if (uploadItem?.isUploading) {
-      setErrorMessage("An upload is already in progress. Please wait.");
+    if (!selectedFiles.length) return;
+
+    const selectedSize = selectedFiles.reduce(
+      (total, file) => total + file.size,
+      0
+    );
+    const activeUploadSize = uploadItems.reduce(
+      (total, item) => total + item.size,
+      0
+    );
+    const remainingSpace =
+      maxStorageInBytes - usedStorageInBytes - activeUploadSize;
+
+    if (selectedSize > remainingSpace) {
+      setErrorMessage("Not enough storage for the selected files.");
       setTimeout(() => setErrorMessage(""), 3000);
-      e.target.value = "";
       return;
     }
 
-    const tempItem = {
-      file,
-      name: file.name,
-      size: file.size,
-      id: `temp-${Date.now()}`,
-      isUploading: true,
-      progress: 0,
-    };
+    const failedFiles = [];
 
-    try {
-      const data = await uploadInitiate({
-        filename: file.name,
-        filesize: file.size,
-        contentType: file.type,
-        parentDirId: dirId,
-      });
+    for (const [index, file] of selectedFiles.entries()) {
+      const tempItem = {
+        file,
+        name: file.name,
+        size: file.size,
+        id: `temp-${Date.now()}-${index}`,
+        isUploading: true,
+        progress: 0,
+      };
 
-      const { uploadSignedUrl, fileId } = data;
+      try {
+        const data = await uploadInitiate({
+          filename: file.name,
+          filesize: file.size,
+          contentType: file.type || "application/octet-stream",
+          parentDirId: dirId,
+        });
 
-      setFilesList((prev) => [tempItem, ...prev]);
-      setUploadItem(tempItem);
-      e.target.value = "";
+        const { uploadSignedUrl, fileId } = data;
+        const uploadItem = { ...tempItem, fileId };
 
-      startUpload({
-        item: tempItem,
-        uploadUrl: uploadSignedUrl,
-        fileId,
-      });
-    } catch (err) {
-      setErrorMessage(err.response?.data?.error || "Upload initiation failed");
+        setFilesList((prev) => [uploadItem, ...prev]);
+        setUploadItems((prev) => [uploadItem, ...prev]);
+
+        startUpload({
+          item: uploadItem,
+          uploadUrl: uploadSignedUrl,
+          fileId,
+        });
+      } catch (err) {
+        failedFiles.push(file.name);
+        setErrorMessage(err.response?.data?.error || "Upload initiation failed");
+        setTimeout(() => setErrorMessage(""), 3000);
+      }
+    }
+
+    if (failedFiles.length > 1) {
+      setErrorMessage(`${failedFiles.length} files could not start uploading.`);
       setTimeout(() => setErrorMessage(""), 3000);
     }
   }
 
   function startUpload({ item, uploadUrl, fileId }) {
     const xhr = new XMLHttpRequest();
-    xhrRef.current = xhr;
+    xhrRefs.current.set(item.id, xhr);
 
     xhr.open("PUT", uploadUrl);
 
     xhr.upload.addEventListener("progress", (evt) => {
       if (evt.lengthComputable) {
         const progress = (evt.loaded / evt.total) * 100;
-        setUploadItem((prev) => (prev ? { ...prev, progress } : prev));
+        setUploadItems((prev) =>
+          prev.map((uploadItem) =>
+            uploadItem.id === item.id ? { ...uploadItem, progress } : uploadItem
+          )
+        );
+        setFilesList((prev) =>
+          prev.map((fileItem) =>
+            fileItem.id === item.id ? { ...fileItem, progress } : fileItem
+          )
+        );
       }
     });
 
     xhr.onload = async () => {
+      let uploadCompleted = false;
+
       if (xhr.status === 200) {
-        await uploadComplete(fileId);
+        try {
+          await uploadComplete(fileId);
+          uploadCompleted = true;
+        } catch (err) {
+          setErrorMessage(err.response?.data?.error || "File not uploaded");
+          setTimeout(() => setErrorMessage(""), 3000);
+        }
       } else {
         setErrorMessage("File not uploaded");
+        try {
+          await uploadCancel(fileId);
+        } catch {
+          // The backend may have already removed a failed pending upload.
+        }
         setTimeout(() => setErrorMessage(""), 3000);
       }
 
-      setUploadItem(null);
+      if (uploadCompleted) {
+        setUsedStorageInBytes((prev) => prev + item.size);
+      }
+
+      xhrRefs.current.delete(item.id);
+      setUploadItems((prev) =>
+        prev.filter((uploadItem) => uploadItem.id !== item.id)
+      );
       loadDirectory();
     };
 
     xhr.onerror = () => {
       setErrorMessage("Something went wrong!");
       setFilesList((prev) => prev.filter((f) => f.id !== item.id));
-      setUploadItem(null);
+      setUploadItems((prev) =>
+        prev.filter((uploadItem) => uploadItem.id !== item.id)
+      );
+      xhrRefs.current.delete(item.id);
       setTimeout(() => setErrorMessage(""), 3000);
     };
 
     xhr.send(item.file);
   }
 
-  function handleCancelUpload(tempId) {
-    if (uploadItem && uploadItem.id === tempId && xhrRef.current) {
-      xhrRef.current.abort();
+  async function handleCancelUpload(tempId) {
+    const uploadItem = uploadItems.find((item) => item.id === tempId);
+    const xhr = xhrRefs.current.get(tempId);
+
+    if (xhr) {
+      xhr.abort();
+      xhrRefs.current.delete(tempId);
+    }
+
+    const pendingFileId = uploadItem?.fileId || tempId;
+
+    if (pendingFileId && !String(pendingFileId).startsWith("temp-")) {
+      try {
+        await uploadCancel(pendingFileId);
+      } catch (err) {
+        setErrorMessage(
+          err.response?.data?.error || "Upload could not be cancelled."
+        );
+        setTimeout(() => setErrorMessage(""), 3000);
+      }
     }
 
     setFilesList((prev) => prev.filter((f) => f.id !== tempId));
-    setUploadItem(null);
+    setUploadItems((prev) => prev.filter((item) => item.id !== tempId));
   }
 
   async function confirmDelete(item) {
@@ -407,10 +483,11 @@ function DirectoryView() {
     ...filesList.map((f) => ({ ...f, isDirectory: false })),
   ];
 
-  const isUploading = !!uploadItem?.isUploading;
-  const progressMap = uploadItem
-    ? { [uploadItem.id]: uploadItem.progress || 0 }
-    : {};
+  const isUploading = uploadItems.length > 0;
+  const progressMap = uploadItems.reduce(
+    (map, item) => ({ ...map, [item.id]: item.progress || 0 }),
+    {}
+  );
   const isAccessError =
     errorMessage === "Directory not found or you do not have access to it!";
 
@@ -468,7 +545,7 @@ function DirectoryView() {
         }
       `}</style>
 
-      <div className="flex min-h-screen bg-[#f0f2f6]">
+      <div className="flex min-h-screen bg-[radial-gradient(circle_at_top_left,#f8fbff_0,#eef3f8_34%,#e8edf4_100%)]">
         <AppSidebar
           combinedItems={combinedItems}
           storageHigh={storageHigh}
@@ -488,13 +565,13 @@ function DirectoryView() {
           navigate={navigate}
         />
 
-        <div className="ml-60 flex flex-1 flex-col min-h-screen">
+        <div className="ml-60 flex min-h-screen flex-1 flex-col">
           {/* ── TOP BAR ── */}
-          <header className="sticky top-0 z-30 flex h-[60px] items-center justify-between gap-4 border-b border-[#e4e7ec] bg-[#f0f2f6]/90 px-8 backdrop-blur-md">
+          <header className="sticky top-0 z-30 flex min-h-[72px] items-center justify-between gap-4 border-b border-white/70 bg-white/78 px-8 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.04)]">
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-slate-400 min-w-0">
               <button
                 onClick={() => navigate(-1)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-black/[0.06] transition-colors text-slate-500 flex-shrink-0"
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-transparent text-slate-500 transition-colors hover:border-slate-200 hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                 title="Go back"
               >
                 <svg
@@ -524,12 +601,12 @@ function DirectoryView() {
                 </>
               )}
             </div>
-            {/* // adjust here the update NAvbAr and folder   */}
-            <div className="flex items-center gap-2.5 flex-shrink-0 mt-60">
+
+            <div className="flex flex-shrink-0 items-center gap-2.5">
               <button
                 onClick={() => setShowCreateDirModal(true)}
                 disabled={isAccessError}
-                className="flex items-center gap-2 rounded-xl border border-[#dde1e8] bg-white px-4 py-[9px] text-[13px] font-semibold text-slate-600 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-950 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/25 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-sm active:scale-[0.98]"
               >
                 <FaFolderPlus className="text-[12px]" />
                 New Folder
@@ -538,7 +615,7 @@ function DirectoryView() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isAccessError}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-[9px] text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(37,99,235,0.32)] hover:bg-blue-700 hover:shadow-[0_4px_16px_rgba(37,99,235,0.42)] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                className="flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-[0_16px_32px_rgba(37,99,235,0.28)] focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 active:scale-[0.98]"
               >
                 <FaUpload className="text-[11px]" />
                 Upload
@@ -555,43 +632,47 @@ function DirectoryView() {
             )}
 
             {/* ── STATS STRIP ── */}
-            <div className="mb-6 grid grid-cols-3 gap-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
               {[
                 {
-                  icon: "🗂️",
+                  icon: FaFolder,
                   label: "Folders",
                   value: folderCount,
-                  bg: "bg-blue-50 border-blue-100",
-                  iconBg: "bg-blue-100",
-                  val: "text-blue-700",
+                  bg: "from-blue-50 to-white border-blue-100/80",
+                  iconBg: "bg-blue-600 text-white",
+                  val: "text-slate-950",
                 },
                 {
-                  icon: "📎",
+                  icon: FaFileAlt,
                   label: "Files",
                   value: fileCount,
-                  bg: "bg-violet-50 border-violet-100",
-                  iconBg: "bg-violet-100",
-                  val: "text-violet-700",
+                  bg: "from-violet-50 to-white border-violet-100/80",
+                  iconBg: "bg-violet-600 text-white",
+                  val: "text-slate-950",
                 },
                 {
-                  icon: "💾",
+                  icon: FaDatabase,
                   label: "Space used",
                   value: `${usedGB.toFixed(2)} GB`,
                   bg: storageHigh
-                    ? "bg-red-50 border-red-100"
-                    : "bg-emerald-50 border-emerald-100",
-                  iconBg: storageHigh ? "bg-red-100" : "bg-emerald-100",
-                  val: storageHigh ? "text-red-700" : "text-emerald-700",
+                    ? "from-red-50 to-white border-red-100/80"
+                    : "from-emerald-50 to-white border-emerald-100/80",
+                  iconBg: storageHigh
+                    ? "bg-red-600 text-white"
+                    : "bg-emerald-600 text-white",
+                  val: storageHigh ? "text-red-700" : "text-slate-950",
                 },
-              ].map((s, i) => (
+              ].map((s) => {
+                const StatIcon = s.icon;
+                return (
                 <div
-                  key={i}
-                  className={`flex items-center gap-4 rounded-2xl border bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all ${s.bg}`}
+                  key={s.label}
+                  className={`flex items-center gap-4 rounded-2xl border bg-gradient-to-br p-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(15,23,42,0.08)] ${s.bg}`}
                 >
                   <div
-                    className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-xl ${s.iconBg}`}
+                    className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-[15px] shadow-sm ${s.iconBg}`}
                   >
-                    {s.icon}
+                    <StatIcon />
                   </div>
                   <div>
                     <p
@@ -604,7 +685,8 @@ function DirectoryView() {
                     </p>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* ── SEARCH + COUNT ── */}
@@ -627,11 +709,11 @@ function DirectoryView() {
             </div>
 
             {/* ── FILE LIST CARD ── */}
-          <div className="rounded-2xl border border-[#e4e7ec] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-white/80 bg-white/90 shadow-[0_22px_60px_rgba(15,23,42,0.08)]">
 
 
               {filteredItems.length > 0 && (
-                <div className="grid grid-cols-[2fr_1fr_1fr_80px] border-b border-[#f0f2f5] bg-[#f8f9fb] px-5 py-2.5">
+                <div className="grid grid-cols-[2fr_1fr_1fr_80px] border-b border-slate-100 bg-slate-50/80 px-5 py-3">
                   {["Name", "Type", "Size", ""].map((h, i) => (
                     <span
                       key={i}
@@ -648,25 +730,25 @@ function DirectoryView() {
               {filteredItems.length === 0 ? (
                 isAccessError ? (
                   <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                    <div className="relative mb-5 h-20 w-20 flex items-center justify-center">
+                    <div className="relative mb-5 flex h-20 w-20 items-center justify-center">
                       <div className="absolute inset-0 animate-[spin_20s_linear_infinite] rounded-full border border-dashed border-slate-200" />
-                      <div className="flex h-[54px] w-[54px] items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-3xl">
-                        🚫
+                      <div className="flex h-[54px] w-[54px] items-center justify-center rounded-2xl border border-red-100 bg-red-50 text-red-500">
+                        <AlertIcon />
                       </div>
                     </div>
                     <p className="text-[15px] font-bold text-slate-700 mb-1">
                       Access denied
                     </p>
                     <p className="max-w-[220px] text-[13px] leading-relaxed text-slate-400">
-                      You don't have permission to view this directory.
+                      You don&apos;t have permission to view this directory.
                     </p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                    <div className="relative mb-5 h-20 w-20 flex items-center justify-center">
+                    <div className="relative mb-5 flex h-20 w-20 items-center justify-center">
                       <div className="absolute inset-0 animate-[spin_20s_linear_infinite] rounded-full border border-dashed border-slate-200" />
-                      <div className="flex h-[54px] w-[54px] items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-3xl">
-                        {searchQuery ? "🔍" : "📁"}
+                      <div className="flex h-[54px] w-[54px] items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-600">
+                        {searchQuery ? <SearchIcon /> : <FaFolder />}
                       </div>
                     </div>
 
@@ -683,7 +765,7 @@ function DirectoryView() {
                     {!searchQuery && !isAccessError && (
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_2px_10px_rgba(37,99,235,0.28)] hover:bg-blue-700 transition-all active:scale-[0.98]"
+                        className="flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-0.5 hover:bg-blue-700 active:scale-[0.98]"
                       >
                         <FaUpload className="text-[11px]" />
                         Upload your first file
@@ -735,56 +817,77 @@ function DirectoryView() {
       <input
         type="file"
         ref={fileInputRef}
+        multiple
         onChange={handleFileSelect}
         className="hidden"
       />
 
       {/* ─═══ UPLOAD TOAST ════ */}
-      {uploadItem && (
-        <div className="toast-in fixed bottom-6 right-6 z-[9999] w-[336px] overflow-hidden rounded-2xl border border-white/10 bg-[#0d0f14] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+      {uploadItems.length > 0 && (
+        <div className="toast-in fixed bottom-6 right-6 z-[9999] w-[360px] overflow-hidden rounded-2xl border border-white/10 bg-[#0d0f14] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
           <div className="shimmer-bar h-[3px]" />
 
           <div className="p-4">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-[15px]">
-                  {getFileIcon(uploadItem.name)}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold text-white">
-                    {uploadItem.name}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-white/30">
-                    {formatBytes(uploadItem.size)}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleCancelUpload(uploadItem.id)}
-                title="Cancel"
-                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-[17px] text-white/40 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 transition-all"
-              >
-                ×
-              </button>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-[13px] font-semibold text-white">
+                Uploading {uploadItems.length} file
+                {uploadItems.length !== 1 ? "s" : ""}
+              </p>
+              <p className="text-[11px] font-medium text-white/35">
+                {formatBytes(
+                  uploadItems.reduce((total, item) => total + item.size, 0)
+                )}
+              </p>
             </div>
 
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.07]">
-              <div
-                className="shimmer-bar h-full rounded-full transition-[width_0.3s_ease]"
-                style={{ width: `${Math.round(uploadItem.progress || 0)}%` }}
-              />
-            </div>
+            <div className="max-h-[260px] space-y-3 overflow-y-auto pr-1">
+              {uploadItems.map((uploadItem) => (
+                <div key={uploadItem.id}>
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-[15px] text-white/70">
+                        <FaFileAlt />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-semibold text-white">
+                          {uploadItem.name}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-white/30">
+                          {formatBytes(uploadItem.size)}
+                        </p>
+                      </div>
+                    </div>
 
-            <div className="mt-2.5 flex items-center justify-between">
-              <span className="text-[11.5px] font-medium text-white/30">
-                {Math.round(uploadItem.progress || 0) >= 100
-                  ? "Processing…"
-                  : "Uploading…"}
-              </span>
-              <span className="font-mono text-[12px] font-semibold text-blue-400">
-                {Math.round(uploadItem.progress || 0)}%
-              </span>
+                    <button
+                      onClick={() => handleCancelUpload(uploadItem.id)}
+                      title="Cancel"
+                      className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-[17px] text-white/40 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 transition-all"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.07]">
+                    <div
+                      className="shimmer-bar h-full rounded-full transition-[width_0.3s_ease]"
+                      style={{
+                        width: `${Math.round(uploadItem.progress || 0)}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[11.5px] font-medium text-white/30">
+                      {Math.round(uploadItem.progress || 0) >= 100
+                        ? "Processing…"
+                        : "Uploading…"}
+                    </span>
+                    <span className="font-mono text-[12px] font-semibold text-blue-400">
+                      {Math.round(uploadItem.progress || 0)}%
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

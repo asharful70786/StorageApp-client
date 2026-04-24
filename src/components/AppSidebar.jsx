@@ -5,7 +5,6 @@ import {
   FaCrown,
   FaCloud,
   FaFolder,
-  FaTrash,
   FaCog,
   FaHdd,
   FaShareAlt
@@ -54,32 +53,32 @@ function AppSidebar({
     : "bg-gradient-to-r from-blue-500 to-violet-500";
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-slate-200 bg-[#f8fafc]">
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-white/70 bg-slate-950 text-white shadow-[16px_0_40px_rgba(15,23,42,0.12)]">
       {/* Brand */}
-      <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-[18px]">
-        <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center rounded-[12px] bg-gradient-to-br from-blue-500 to-violet-600 shadow-[0_8px_24px_rgba(99,102,241,0.18)]">
+      <div className="flex items-center gap-3 border-b border-white/10 px-5 py-[18px]">
+        <div className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-[14px] bg-blue-500 shadow-[0_14px_32px_rgba(59,130,246,0.32)]">
           <FaCloud className="text-white text-sm" />
         </div>
         <div>
-          <p className="text-[14.5px] font-bold leading-none tracking-tight text-slate-900">
+          <p className="text-[14.5px] font-bold leading-none tracking-tight text-white">
             CloudStorage
           </p>
-          <p className="mt-0.5 text-[11px] text-slate-500">Secure file storage</p>
+          <p className="mt-1 text-[11px] text-slate-400">Secure file storage</p>
         </div>
       </div>
 
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4">
-        <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+        <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
           Storage
         </p>
 
-        <div className="mb-1 flex items-center gap-2.5 rounded-[11px] border border-blue-100 bg-[#eaf2ff] px-3 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <FaFolder className="flex-shrink-0 text-[13px] text-blue-600" />
-          <span className="flex-1 text-[13.5px] font-semibold text-slate-900">
+        <div className="mb-1 flex items-center gap-2.5 rounded-[13px] border border-blue-400/30 bg-blue-500/15 px-3 py-2.5 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]">
+          <FaFolder className="flex-shrink-0 text-[13px] text-blue-300" />
+          <span className="flex-1 text-[13.5px] font-semibold text-white">
             My Drive
           </span>
-          <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-200">
+          <span className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
             {combinedItems.length}
           </span>
         </div>
@@ -88,16 +87,16 @@ function AppSidebar({
        
        {/* Shared with Others */}
 <div
-  className="mb-0.5 flex cursor-not-allowed items-center gap-2.5 rounded-[11px] px-3 py-2.5 opacity-65"
+  className="mb-0.5 flex cursor-not-allowed items-center gap-2.5 rounded-[13px] px-3 py-2.5 opacity-70"
   title="Coming soon"
 >
-  <FaShareAlt className="flex-shrink-0 text-[13px] text-slate-400" />
+  <FaShareAlt className="flex-shrink-0 text-[13px] text-slate-500" />
   
-  <span className="flex-1 text-[13.5px] font-medium text-slate-500">
+  <span className="flex-1 text-[13.5px] font-medium text-slate-400">
     Shared with Others
   </span>
 
-  <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">
+  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-400">
     Soon
   </span>
 </div>
@@ -105,13 +104,13 @@ function AppSidebar({
       </nav>
 
       {/* Bottom section */}
-      <div className="space-y-1 border-t border-slate-200 px-3 py-4">
+      <div className="space-y-1 border-t border-white/10 px-3 py-4">
         {/* Storage */}
-        <div className="mb-2 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="mb-2 rounded-2xl border border-white/10 bg-white/[0.06] p-3.5 shadow-[0_1px_0_rgba(255,255,255,0.04)_inset]">
           <div className="mb-2.5 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <FaHdd className="text-[11px] text-slate-400" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Storage
               </span>
             </div>
@@ -122,7 +121,7 @@ function AppSidebar({
             )}
           </div>
 
-          <div className="mb-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="mb-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
             <div
               className={`h-full rounded-full transition-all duration-700 ${storageBarColor}`}
               style={{ width: `${Math.max(storagePercentage, 2)}%` }}
@@ -136,19 +135,19 @@ function AppSidebar({
                   ? "text-red-500"
                   : storageMid
                   ? "text-amber-500"
-                  : "text-slate-800"
+                  : "text-white"
               }`}
             >
               {usedGB.toFixed(2)} GB
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-slate-400">
               of {totalGB.toFixed(0)} GB
             </span>
           </div>
         </div>
 
         {/* Settings */}
-        <button className="flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2 text-[13px] font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
+        <button className="flex w-full items-center gap-2.5 rounded-[13px] px-3 py-2 text-[13px] font-medium text-slate-400 transition-all hover:bg-white/10 hover:text-white">
           <FaCog className="text-[12px]" />
           Settings
         </button>
@@ -159,8 +158,8 @@ function AppSidebar({
             onClick={() => setShowUserMenu((p) => !p)}
             className={`flex w-full items-center gap-2.5 rounded-[12px] border px-3 py-2 text-left transition-all ${
               showUserMenu
-                ? "border-slate-200 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
-                : "border-transparent bg-transparent hover:border-slate-200 hover:bg-white"
+                ? "border-white/10 bg-white/10 shadow-[0_2px_8px_rgba(15,23,42,0.16)]"
+                : "border-transparent bg-transparent hover:border-white/10 hover:bg-white/10"
             }`}
           >
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-violet-500">
@@ -176,10 +175,10 @@ function AppSidebar({
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12.5px] font-semibold leading-none text-slate-800">
+              <p className="truncate text-[12.5px] font-semibold leading-none text-white">
                 {userName}
               </p>
-              <p className="mt-0.5 truncate text-[10.5px] text-slate-500">
+              <p className="mt-1 truncate text-[10.5px] text-slate-400">
                 {userEmail}
               </p>
             </div>
