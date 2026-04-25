@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+/* eslint-disable react/prop-types */
 import {
   FaUser,
   FaSignOutAlt,
@@ -7,7 +8,7 @@ import {
   FaFolder,
   FaCog,
   FaHdd,
-  FaShareAlt
+  FaShareAlt,
 } from "react-icons/fa";
 
 
@@ -45,6 +46,8 @@ function AppSidebar({
   handleLogout,
   handleLogoutAll,
   navigate,
+  activeSection = "drive",
+  sharedCount = 0,
 }) {
   const storageBarColor = storageHigh
     ? "bg-red-500"
@@ -73,33 +76,57 @@ function AppSidebar({
           Storage
         </p>
 
-        <div className="mb-1 flex items-center gap-2.5 rounded-[13px] border border-blue-400/30 bg-blue-500/15 px-3 py-2.5 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]">
+        <Link
+          to="/"
+          className={`mb-1 flex items-center gap-2.5 rounded-[13px] border px-3 py-2.5 transition-all ${
+            activeSection === "drive"
+              ? "border-blue-400/30 bg-blue-500/15 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]"
+              : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/10 hover:text-white"
+          }`}
+        >
           <FaFolder className="flex-shrink-0 text-[13px] text-blue-300" />
-          <span className="flex-1 text-[13.5px] font-semibold text-white">
+          <span
+            className={`flex-1 text-[13.5px] ${
+              activeSection === "drive"
+                ? "font-semibold text-white"
+                : "font-medium"
+            }`}
+          >
             My Drive
           </span>
           <span className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
             {combinedItems.length}
           </span>
-        </div>
+        </Link>
 
-        
-       
-       {/* Shared with Others */}
-<div
-  className="mb-0.5 flex cursor-not-allowed items-center gap-2.5 rounded-[13px] px-3 py-2.5 opacity-70"
-  title="Coming soon"
->
-  <FaShareAlt className="flex-shrink-0 text-[13px] text-slate-500" />
-  
-  <span className="flex-1 text-[13.5px] font-medium text-slate-400">
-    Shared with Others
-  </span>
-
-  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-    Soon
-  </span>
-</div>
+        <Link
+          to="/shared"
+          className={`group mb-0.5 flex items-center gap-2.5 rounded-[13px] border px-3 py-2.5 transition-all ${
+            activeSection === "shared"
+              ? "border-cyan-300/30 bg-cyan-400/15 text-white shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]"
+              : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/10 hover:text-white"
+          }`}
+        >
+          <FaShareAlt
+            className={`flex-shrink-0 text-[13px] ${
+              activeSection === "shared"
+                ? "text-cyan-300"
+                : "text-slate-500 group-hover:text-cyan-300"
+            }`}
+          />
+          <span className="flex-1 text-[13.5px] font-medium">
+            Shared by me
+          </span>
+          <span
+            className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+              activeSection === "shared"
+                ? "border-cyan-300/20 bg-cyan-300/15 text-cyan-100"
+                : "border-white/10 bg-white/5 text-slate-400"
+            }`}
+          >
+            {sharedCount}
+          </span>
+        </Link>
         
       </nav>
 

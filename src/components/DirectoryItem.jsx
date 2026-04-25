@@ -1,4 +1,5 @@
 // DirectoryItem.js
+/* eslint-disable react/prop-types */
 import {
   FaFolder,
   FaFilePdf,
@@ -102,14 +103,23 @@ function DirectoryItem({ item, uploadProgress }) {
         </div>
 
         <div
-          className="ml-auto flex h-9 w-9 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          data-more-button
+          className={`ml-auto flex h-9 w-9 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl transition-colors ${
+            activeContextMenu?.id === item.id
+              ? "bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)]"
+              : "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          }`}
           onClick={(e) => handleContextMenu(e, item.id)}
           title="More actions"
         >
           <BsThreeDotsVertical />
         </div>
-        {activeContextMenu === item.id && (
-          <ContextMenu item={item} isUploadingItem={isUploadingItem} />
+        {activeContextMenu?.id === item.id && (
+          <ContextMenu
+            item={item}
+            anchor={activeContextMenu.anchor}
+            isUploadingItem={isUploadingItem}
+          />
         )}
       </div>
       {isUploadingItem && (

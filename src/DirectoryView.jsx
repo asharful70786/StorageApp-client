@@ -21,6 +21,7 @@ import {
 } from "./api/fileApi";
 import DetailsPopup from "./components/DetailsPopup";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModel";
+import ShareModal from "./components/share-modal";
 import {
   FaDatabase,
   FaFileAlt,
@@ -161,9 +162,11 @@ function DirectoryView() {
   const [activeContextMenu, setActiveContextMenu] = useState(null);
   const [detailsItem, setDetailsItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
 
   const openDetailsPopup = (item) => setDetailsItem(item);
   const closeDetailsPopup = () => setDetailsItem(null);
+  const openShareModal = (item) => setShareItem(item);
 
   // ── Derived storage values ─────────────────────────────────────────────────
   const usedGB = usedStorageInBytes / 1024 ** 3;
@@ -506,7 +509,25 @@ function DirectoryView() {
     handleContextMenu: (e, id) => {
       e.stopPropagation();
       e.preventDefault();
-      setActiveContextMenu((prev) => (prev === id ? null : id));
+      const rect = e.currentTarget.getBoundingClientRect();
+      const isMoreButton = e.currentTarget.closest("[data-more-button]");
+      const anchor = isMoreButton
+        ? {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+          }
+        : {
+            top: e.clientY,
+            right: e.clientX,
+            bottom: e.clientY,
+            left: e.clientX,
+          };
+
+      setActiveContextMenu((prev) =>
+        prev?.id === id ? null : { id, anchor }
+      );
     },
     getFileIcon,
     isUploading,
@@ -515,6 +536,8 @@ function DirectoryView() {
     setDeleteItem,
     openRenameModal,
     openDetailsPopup,
+    openShareModal,
+    closeContextMenu: () => setActiveContextMenu(null),
   };
 
   return (
@@ -803,6 +826,10 @@ function DirectoryView() {
 
       {detailsItem && (
         <DetailsPopup item={detailsItem} onClose={closeDetailsPopup} />
+      )}
+
+      {shareItem && (
+        <ShareModal item={shareItem} onClose={() => setShareItem(null)} />
       )}
 
       {deleteItem && (

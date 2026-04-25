@@ -6,10 +6,11 @@ import Login from "./Login";
 import UsersPage from "./UsersPage";
 import Plans from "./Plans";
 import Subscription from "./Subscription";
-import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
 import LandingPage from "./LandingPage";
 import TermsAndPrivacy from "./TermsAndPrivacy";
+import PublicSharePage from "./public-share-page";
+import SharedByMePage from "./shared-by-me-page";
 
 
 
@@ -49,6 +50,14 @@ const router = createBrowserRouter([
   {
     path: "/terms",
     element: <TermsAndPrivacy />,
+  },
+  {
+    path: "/share/:token",
+    element: <PublicSharePage />,
+  },
+  {
+    path: "/shared",
+    element: <SharedByMePage />,
   },
 ]);
 
