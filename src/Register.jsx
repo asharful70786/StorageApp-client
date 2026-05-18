@@ -567,7 +567,7 @@ const Register = () => {
 
             <p className="form-greeting">Get started free</p>
             <h2 className="form-title">Create your account</h2>
-            <p className="form-desc">15 GB free. No credit card required.</p>
+            <p className="form-desc">5 GB free. No credit card required.</p>
 
             {/* Step indicator */}
             <div className="steps">

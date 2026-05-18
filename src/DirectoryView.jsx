@@ -92,7 +92,7 @@ function DirectoryView() {
   const [userName, setUserName] = useState("Guest User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
-  const [maxStorageInBytes, setMaxStorageInBytes] = useState(10 * 1024 ** 3);
+  const [maxStorageInBytes, setMaxStorageInBytes] = useState(5 * 1024 ** 3);
   const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
 

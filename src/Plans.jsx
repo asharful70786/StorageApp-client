@@ -199,7 +199,7 @@ export default function Plans() {
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [maxStorageInBytes, setMaxStorageInBytes] = useState(10 * 1024 ** 3);
+  const [maxStorageInBytes, setMaxStorageInBytes] = useState(5 * 1024 ** 3);
   const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
   const [driveItemCount, setDriveItemCount] = useState(0);
   const [sharedCount, setSharedCount] = useState(0);

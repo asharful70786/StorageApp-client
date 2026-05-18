@@ -222,7 +222,7 @@ export default function TermsAndPrivacy() {
           <SectionCard id="storage">
             <Tag /><SectionTitle>Storage &amp; Files</SectionTitle>
             <div className="text-[14.5px] text-gray-600 leading-relaxed space-y-3">
-              <p>Each free account includes <strong className="text-gray-900">15 GB</strong> of encrypted storage. You retain full ownership of all files you upload.</p>
+              <p>Each free account includes <strong className="text-gray-900">5 GB</strong> of encrypted storage. You retain full ownership of all files you upload.</p>
               <ul className="space-y-2.5">
                 {["You own your files. We claim no intellectual property rights over your content.", "Files are encrypted at rest (AES-256) and in transit (TLS 1.3).", "We do not scan, analyse, or access the contents of your files.", "Shared files are governed by the permissions you configure.", "We may impose reasonable storage quotas and file-size limits."].map((t, i) => (
                   <li key={i} className="flex items-start gap-2.5"><CheckIcon /><span>{t}</span></li>

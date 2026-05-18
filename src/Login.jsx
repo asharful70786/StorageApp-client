@@ -379,14 +379,14 @@ const Login = () => {
               Store files<br />with <em>total</em><br />confidence.
             </h1>
             <p className="panel-sub">
-              15 GB free. Role-based sharing, encrypted vaults,
+              5 GB free. Role-based sharing, encrypted vaults,
               and an API-first design built for teams.
             </p>
           </div>
 
           <div className="panel-stats">
             <div className="stat-item">
-              <div className="stat-num">15 GB</div>
+              <div className="stat-num">5 GB</div>
               <div className="stat-label">Free storage</div>
             </div>
             <div className="stat-item">

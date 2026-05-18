@@ -26,7 +26,7 @@ function DirectoryHeader({
   const [userName, setUserName] = useState("Guest User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
-  const [maxStorageInBytes, setMaxStorageInBytes] = useState(1073741824);
+  const [maxStorageInBytes, setMaxStorageInBytes] = useState(5 * 1024 ** 3);
   const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
   const usedGB = usedStorageInBytes / 1024 ** 3;
   const totalGB = maxStorageInBytes / 1024 ** 3;
