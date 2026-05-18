@@ -3,8 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { loginWithGoogle, sendOtp, verifyOtp } from "./api/authApi";
 import { registerUser } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
 
 const Register = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -773,8 +775,15 @@ const Register = () => {
             <div className="google-wrap">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
-                  const data = await loginWithGoogle(credentialResponse.credential);
-                  if (!data.error) navigate("/");
+                  try {
+                    const data = await loginWithGoogle(credentialResponse.credential);
+                    if (!data.error) {
+                      login(data);
+                      navigate("/");
+                    }
+                  } catch (err) {
+                    console.error("Google login failed:", err);
+                  }
                 }}
                 onError={() => console.log("Login Failed")}
                 theme="outline"

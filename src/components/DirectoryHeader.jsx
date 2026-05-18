@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchUser, logoutUser, logoutAllSessions } from "../api/userApi";
+import { fetchUser, logoutAllSessions } from "../api/userApi";
+import { useAuth } from "../context/AuthContext";
 import {
   FaFolderPlus,
   FaUpload,
@@ -33,6 +34,7 @@ function DirectoryHeader({
 
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     async function loadUser() {
@@ -58,10 +60,7 @@ function DirectoryHeader({
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
-      setLoggedIn(false);
-      setUserName("Guest User");
-      setUserEmail("guest@example.com");
+      await logout();
       navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
@@ -73,9 +72,7 @@ function DirectoryHeader({
   const handleLogoutAll = async () => {
     try {
       await logoutAllSessions();
-      setLoggedIn(false);
-      setUserName("Guest User");
-      setUserEmail("guest@example.com");
+      await logout();
       navigate("/login");
     } catch (err) {
       console.error("Logout all error:", err);

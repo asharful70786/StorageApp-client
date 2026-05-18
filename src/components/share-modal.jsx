@@ -5,6 +5,7 @@ import {
   getSharesForItem,
   revokeShare,
 } from "../api/share-api";
+import { ConfirmActionModal } from "./confirm-action-modal";
 
 function formatDate(dateValue) {
   if (!dateValue) return "Never expires";
@@ -27,13 +28,21 @@ function getExpiryTimestamp(dateValue) {
   return expiryDate.toISOString();
 }
 
-function ShareModal({ item, onClose }) {
+/**
+ * Modal for creating and managing share links for an item.
+ * @param {object} props
+ * @param {object|null} props.item
+ * @param {() => void} props.onClose
+ * @returns {JSX.Element|null}
+ */
+export function ShareModal({ item, onClose }) {
   const [permission, setPermission] = useState("view");
   const [expiresAt, setExpiresAt] = useState("");
   const [shares, setShares] = useState([]);
   const [shareUrl, setShareUrl] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [shareToRevoke, setShareToRevoke] = useState(null);
 
   const targetType = getTargetType(item);
 
@@ -220,7 +229,7 @@ function ShareModal({ item, onClose }) {
                     </p>
                   </div>
                   <button
-                    onClick={() => handleRevoke(share.id)}
+                    onClick={() => setShareToRevoke(share)}
                     disabled={loading}
                     className="rounded-xl border border-red-100 bg-white px-3 py-2 text-xs font-bold text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
@@ -242,8 +251,28 @@ function ShareModal({ item, onClose }) {
           </p>
         )}
       </div>
+
+      <ConfirmActionModal
+        isOpen={Boolean(shareToRevoke)}
+        tone="danger"
+        title="Revoke share link?"
+        description={
+          shareToRevoke ? (
+            <>
+              Anyone with this link will lose access immediately. You can create
+              a new link later if needed.
+            </>
+          ) : null
+        }
+        confirmLabel="Revoke"
+        cancelLabel="Cancel"
+        onCancel={() => setShareToRevoke(null)}
+        onConfirm={async () => {
+          if (!shareToRevoke) return;
+          await handleRevoke(shareToRevoke.id);
+          setShareToRevoke(null);
+        }}
+      />
     </div>
   );
 }
-
-export default ShareModal;

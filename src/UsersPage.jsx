@@ -6,12 +6,18 @@ import {
   deleteUserById,
   logoutUserById,
 } from "./api/userApi";
+import { ConfirmActionModal } from "./components/confirm-action-modal";
 
-export default function UsersPage() {
+/**
+ * Admin view to manage users.
+ * @returns {JSX.Element}
+ */
+export function UsersPage() {
   const [users, setUsers] = useState([]);
   const [userName, setUserName] = useState("Guest User");
   const [userEmail, setUserEmail] = useState("");
   const [userRole, setUserRole] = useState("User");
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigate = useNavigate();
 
   const logoutUser = async (user) => {
@@ -25,14 +31,15 @@ export default function UsersPage() {
     }
   };
 
-  const deleteUser = async (user) => {
-    const confirmed = confirm(`You are about to delete ${user.email}`);
-    if (!confirmed) return;
+  const deleteUser = async () => {
+    if (!userToDelete) return;
     try {
-      await deleteUserById(user.id);
+      await deleteUserById(userToDelete.id);
       fetchUsers();
     } catch (err) {
       console.error("Delete error:", err);
+    } finally {
+      setUserToDelete(null);
     }
   };
 
@@ -107,7 +114,7 @@ export default function UsersPage() {
               {userRole === "Admin" && (
                 <td className="border p-3">
                   <button
-                    onClick={() => deleteUser(user)}
+                    onClick={() => setUserToDelete(user)}
                     disabled={user.email === userEmail}
                     className={`px-3 py-1 text-sm text-white rounded ${
                       user.email === userEmail
@@ -123,6 +130,27 @@ export default function UsersPage() {
           ))}
         </tbody>
       </table>
+
+      <ConfirmActionModal
+        isOpen={Boolean(userToDelete)}
+        tone="danger"
+        title="Delete user?"
+        description={
+          userToDelete ? (
+            <>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-slate-800">
+                {userToDelete.email}
+              </span>
+              ? This action cannot be undone.
+            </>
+          ) : null
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onCancel={() => setUserToDelete(null)}
+        onConfirm={deleteUser}
+      />
     </div>
   );
 }

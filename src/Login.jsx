@@ -3,8 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { loginWithGoogle } from "./api/authApi";
 import { loginUser } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
 
 const Login = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,7 +26,10 @@ const Login = () => {
     try {
       const data = await loginUser(formData);
       if (data.error) setServerError(data.error);
-      else navigate("/");
+      else {
+        login(data);
+        navigate("/");
+      }
     } catch (err) {
       console.error("Login error:", err);
       setServerError(err.response?.data?.error || "Something went wrong.");
@@ -457,7 +462,7 @@ const Login = () => {
             </form>
 
             <p className="form-footer">
-              Don't have an account?&nbsp;
+              Don&apos;t have an account?&nbsp;
               <Link to="/register">Create one</Link>
             </p>
 
@@ -472,7 +477,10 @@ const Login = () => {
                 onSuccess={async (credentialResponse) => {
                   try {
                     const data = await loginWithGoogle(credentialResponse.credential);
-                    if (!data.error) navigate("/");
+                    if (!data.error) {
+                      login(data);
+                      navigate("/");
+                    }
                   } catch (err) {
                     console.error("Google login failed:", err);
                   }
