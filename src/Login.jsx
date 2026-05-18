@@ -44,10 +44,13 @@ const Login = () => {
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
 
         .login-root {
-          min-height: 100vh;
+          min-height: 100dvh;
           display: flex;
           font-family: 'DM Sans', sans-serif;
-          background-color: #f7f7f5;
+          background:
+            radial-gradient(1200px 700px at 15% 10%, rgba(99,102,241,0.10), transparent 55%),
+            radial-gradient(900px 520px at 85% 45%, rgba(139,92,246,0.08), transparent 60%),
+            #f7f8fb;
         }
 
         /* ── Left decorative panel ── */
@@ -161,19 +164,31 @@ const Login = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 40px 24px;
+          padding: 44px 20px;
         }
 
         .login-card {
           width: 100%;
           max-width: 420px;
+          background: rgba(255,255,255,0.92);
+          border: 1px solid rgba(148,163,184,0.35);
+          border-radius: 18px;
+          box-shadow:
+            0 18px 50px rgba(15, 23, 42, 0.10),
+            0 4px 14px rgba(15, 23, 42, 0.06);
+          backdrop-filter: blur(10px);
+          padding: 28px;
+        }
+        @media (min-width: 900px) {
+          .login-form-area { padding: 60px 48px; }
+          .login-card { padding: 34px; }
         }
 
         .mobile-brand {
           display: flex;
           align-items: center;
           gap: 10px;
-          margin-bottom: 40px;
+          margin-bottom: 24px;
         }
         @media (min-width: 900px) { .mobile-brand { display: none; } }
 
@@ -195,7 +210,7 @@ const Login = () => {
         .form-desc {
           font-size: 14px;
           color: #8a8a8a;
-          margin: 0 0 36px;
+          margin: 0 0 26px;
         }
 
         /* Error banner */
@@ -267,12 +282,17 @@ const Login = () => {
           transition: color 0.2s;
         }
         .field-icon-btn:hover { color: #6366f1; }
+        .field-icon-btn:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
+          border-radius: 10px;
+        }
 
         /* Submit btn */
         .btn-submit {
           width: 100%;
           padding: 14px;
-          background: #1a1a1a;
+          background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
           color: #ffffff;
           border: none;
           border-radius: 12px;
@@ -285,10 +305,14 @@ const Login = () => {
           margin-top: 4px;
         }
         .btn-submit:hover {
-          background: #2d2d2d;
+          background: linear-gradient(135deg, #0b1220 0%, #0b1220 100%);
           box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         }
         .btn-submit:active { transform: scale(0.99); }
+        .btn-submit:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 4px rgba(99,102,241,0.18);
+        }
 
         /* Footer links */
         .form-footer {
@@ -395,7 +419,7 @@ const Login = () => {
             <p className="form-desc">Enter your credentials to continue.</p>
 
             {hasError && (
-              <div className="error-banner">
+              <div className="error-banner" role="alert" aria-live="polite">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
@@ -437,7 +461,6 @@ const Login = () => {
                     type="button"
                     className="field-icon-btn"
                     onClick={() => setShowPassword((p) => !p)}
-                    tabIndex={-1}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (

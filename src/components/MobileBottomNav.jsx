@@ -6,7 +6,10 @@ function MobileBottomNav({ onUploadClick }) {
   const isActive = (path) => location.pathname === path || (path === "/" && location.pathname.startsWith("/directory"));
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-slate-200 px-2 pb-safe">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/90 px-2 pb-safe backdrop-blur md:hidden"
+      aria-label="Primary navigation"
+    >
       <div className="flex items-center justify-around h-16">
         {/* My Drive */}
         <Link

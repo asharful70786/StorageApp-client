@@ -10,6 +10,7 @@ import { getDirectoryItems } from "./api/directoryApi";
 import MobileBottomNav from "./components/MobileBottomNav";
 import { formatSize } from "./components/DetailsPopup";
 import { ConfirmActionModal } from "./components/confirm-action-modal";
+import AppSidebar from "./components/AppSidebar";
 
 function formatDate(dateValue) {
   if (!dateValue) return "Never expires";
@@ -175,7 +176,28 @@ export function SharedByMePage() {
       <MobileBottomNav onUploadClick={() => {}} />
 
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <main className="flex-1 min-h-screen px-4 md:px-6 py-6 pb-24 md:pb-10">
+        <AppSidebar
+          driveCount={driveItemCount}
+          storageHigh={storageHigh}
+          storageMid={storageMid}
+          usedGB={usedGB}
+          totalGB={totalGB}
+          storagePercentage={storagePercentage}
+          userMenuRef={userMenuRef}
+          showUserMenu={showUserMenu}
+          setShowUserMenu={setShowUserMenu}
+          userPicture={userPicture}
+          userName={userName}
+          userEmail={userEmail}
+          loggedIn={loggedIn}
+          handleLogout={handleLogout}
+          handleLogoutAll={handleLogoutAll}
+          navigate={navigate}
+          activeSection="shared"
+          sharedCount={shares.length}
+        />
+
+        <main className="flex-1 min-h-screen px-4 md:px-6 py-6 pb-24 md:pb-10 md:pl-60">
           <div className="mx-auto max-w-6xl">
             <section className="mb-6 overflow-hidden rounded-3xl border border-slate-200/60 bg-slate-950 shadow-xl">
               <div className="relative px-6 py-7 text-white sm:px-8">

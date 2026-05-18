@@ -11,6 +11,7 @@ const ChevronRight = () => (
 
 function AppSidebar({
   combinedItems,
+  driveCount = null,
   storageHigh,
   storageMid,
   usedGB,
@@ -35,8 +36,10 @@ function AppSidebar({
     ? "bg-amber-400"
     : "bg-gradient-to-r from-blue-500 to-violet-500";
 
+  const driveItemsCount = typeof driveCount === "number" ? driveCount : (combinedItems?.length || 0);
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-slate-200/60 bg-white shadow-xl">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-slate-200/60 bg-white shadow-xl md:flex">
       {/* Brand */}
       <div className="flex items-center gap-3 border-b border-slate-200/60 px-5 py-[18px]">
         <div className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/20">
@@ -63,7 +66,7 @@ function AppSidebar({
           <FaFolder className={`flex-shrink-0 text-base ${activeSection === "drive" ? "text-blue-500" : "text-slate-400"}`} />
           <span className={`flex-1 text-sm font-medium ${activeSection === "drive" ? "font-semibold" : ""}`}>My Drive</span>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-            {combinedItems.length}
+            {driveItemsCount}
           </span>
         </Link>
 

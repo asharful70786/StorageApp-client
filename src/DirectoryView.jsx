@@ -4,6 +4,7 @@ import CreateDirectoryModal from "./components/CreateDirectoryModal";
 import RenameModal from "./components/RenameModal";
 import DirectoryList from "./components/DirectoryList";
 import MobileBottomNav from "./components/MobileBottomNav";
+import AppSidebar from "./components/AppSidebar";
 import { DirectoryContext } from "./context/DirectoryContext";
 import { fetchUser, logoutAllSessions } from "./api/userApi";
 import { useAuth } from "./context/AuthContext";
@@ -408,8 +409,28 @@ function DirectoryView() {
       <MobileBottomNav onUploadClick={() => fileInputRef.current?.click()} />
 
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <AppSidebar
+          combinedItems={combinedItems}
+          storageHigh={storageHigh}
+          storageMid={storageMid}
+          usedGB={usedGB}
+          totalGB={totalGB}
+          storagePercentage={storagePercentage}
+          userMenuRef={userMenuRef}
+          showUserMenu={showUserMenu}
+          setShowUserMenu={setShowUserMenu}
+          userPicture={userPicture}
+          userName={userName}
+          userEmail={userEmail}
+          loggedIn={loggedIn}
+          handleLogout={handleLogout}
+          handleLogoutAll={handleLogoutAll}
+          navigate={navigate}
+          activeSection="drive"
+          sharedCount={0}
+        />
         {/* Main Content */}
-        <div className="flex-1 min-h-screen flex flex-col w-full">
+        <div className="flex-1 min-h-screen flex flex-col w-full md:pl-60">
           {/* ── TOP BAR ── */}
           <header className="sticky top-0 z-30 flex md:hidden items-center justify-between gap-3 px-4 py-3 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm">
             <button

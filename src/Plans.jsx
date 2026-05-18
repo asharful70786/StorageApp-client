@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { createSubscription } from "./api/subscriptionApi";
 import AppSidebar from "./components/AppSidebar";
+import { fetchUser, logoutAllSessions } from "./api/userApi";
+import { useAuth } from "./context/AuthContext";
+import { getDirectoryItems } from "./api/directoryApi";
+import { getMyShares } from "./api/share-api";
 
 const PLAN_CATALOG = {
   monthly: [
@@ -185,8 +189,20 @@ function PlanCard({ plan, onSelect }) {
 }
 
 export default function Plans() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const userMenuRef = useRef(null);
   const [mode, setMode] = useState("monthly");
   const plans = PLAN_CATALOG[mode];
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("Guest User");
+  const [userEmail, setUserEmail] = useState("guest@example.com");
+  const [userPicture, setUserPicture] = useState("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [maxStorageInBytes, setMaxStorageInBytes] = useState(10 * 1024 ** 3);
+  const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
+  const [driveItemCount, setDriveItemCount] = useState(0);
+  const [sharedCount, setSharedCount] = useState(0);
 
   useEffect(() => {
     const razorpayScript = document.querySelector("#razorpay-script");
@@ -198,6 +214,65 @@ export default function Plans() {
     document.body.appendChild(script);
   }, []);
 
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await fetchUser();
+        setUserName(user.name);
+        setUserEmail(user.email);
+        if (user.picture) setUserPicture(user.picture);
+        setMaxStorageInBytes(user.maxStorageInBytes);
+        setUsedStorageInBytes(user.usedStorageInBytes);
+        setLoggedIn(true);
+      } catch {
+        setLoggedIn(false);
+      }
+    }
+
+    async function loadCounts() {
+      try {
+        const driveData = await getDirectoryItems();
+        setDriveItemCount((driveData.directories?.length || 0) + (driveData.files?.length || 0));
+      } catch {
+        setDriveItemCount(0);
+      }
+
+      try {
+        const shareData = await getMyShares();
+        setSharedCount(shareData.shares?.length || 0);
+      } catch {
+        setSharedCount(0);
+      }
+    }
+
+    loadUser();
+    loadCounts();
+  }, []);
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  const usedGB = usedStorageInBytes / 1024 ** 3;
+  const totalGB = maxStorageInBytes / 1024 ** 3;
+  const storagePercentage = Math.min((usedGB / totalGB) * 100, 100);
+  const storageHigh = storagePercentage > 90;
+  const storageMid = storagePercentage > 75 && !storageHigh;
+
+  async function handleLogout() {
+    try { await logout(); navigate("/login"); } finally { setShowUserMenu(false); }
+  }
+
+  async function handleLogoutAll() {
+    try { await logoutAllSessions(); await logout(); navigate("/login"); } finally { setShowUserMenu(false); }
+  }
+
   async function handleSelect(plan) {
     const { subscriptionId } = await createSubscription(plan.id);
     console.log(subscriptionId);
@@ -205,8 +280,30 @@ export default function Plans() {
   }
 
   return (
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <AppSidebar
+        driveCount={driveItemCount}
+        storageHigh={storageHigh}
+        storageMid={storageMid}
+        usedGB={usedGB}
+        totalGB={totalGB}
+        storagePercentage={storagePercentage}
+        userMenuRef={userMenuRef}
+        showUserMenu={showUserMenu}
+        setShowUserMenu={setShowUserMenu}
+        userPicture={userPicture}
+        userName={userName}
+        userEmail={userEmail}
+        loggedIn={loggedIn}
+        handleLogout={handleLogout}
+        handleLogoutAll={handleLogoutAll}
+        navigate={navigate}
+        activeSection="plans"
+        sharedCount={sharedCount}
+      />
 
-    <div className="mx-auto max-w-6xl px-4 py-8 mt-18">
+      <div className="flex-1 md:pl-60">
+        <div className="mx-auto max-w-6xl px-4 py-8 mt-18">
       
      <header className="mb-8 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/80 px-5 py-5 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
   <div>
@@ -284,6 +381,8 @@ export default function Plans() {
         Prices are indicative for demo. Integrate with Razorpay Subscriptions to
         start billing. You can prefill the plan IDs inside a static config.
       </p>
+        </div>
+      </div>
     </div>
 
  
