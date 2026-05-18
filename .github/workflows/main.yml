@@ -9,22 +9,24 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       id-token: write
+
     env:
-      AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
-      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
-      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME || 'zenpixclient' }}
-      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID || 'E3KPC0TGKLHPJR' }}
-      CLOUDFRONT_INVALIDATION_PATHS: ${{ vars.CLOUDFRONT_INVALIDATION_PATHS || '/*' }}
-      VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID || '864899159744-cauh6ab1uqfkg048p145ji77hr00g3s3.apps.googleusercontent.com' }}
-      VITE_BACKEND_BASE_URL: ${{ vars.VITE_BACKEND_BASE_URL || 'https://api.storage.zenpix.shop' }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+      CLOUDFRONT_INVALIDATION_PATHS: ${{ secrets.CLOUDFRONT_INVALIDATION_PATHS }}
+      VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+      VITE_BACKEND_BASE_URL: ${{ secrets.VITE_BACKEND_BASE_URL }}
 
     steps:
       - name: Clone frontend repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -39,17 +41,8 @@ jobs:
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ env.AWS_ROLE_ARN != '' }}
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Configure AWS credentials (access keys)
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ env.AWS_ROLE_ARN == '' }}
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload to S3 (cache hashed assets)
@@ -69,7 +62,7 @@ jobs:
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
-            --paths $CLOUDFRONT_INVALIDATION_PATHS
+            --paths "$CLOUDFRONT_INVALIDATION_PATHS"
 
       - name: Deployment complete
         run: echo "Frontend Deployed Successfully..."
